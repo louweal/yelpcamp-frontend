@@ -1,0 +1,39 @@
+@keyframes slideY {
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+// AOS customizations
+
+[data-aos] {
+  body[data-aos-easing="cubic"] &,
+  &[data-aos][data-aos-easing="cubic"] {
+    transition-timing-function: cubic-bezier(0.2, 0, 0.1, 1);
+  }
+}
+
+[data-aos="space"] {
+  opacity: 1;
+  letter-spacing: 8px;
+  transition-property: opacity, letter-spacing;
+
+  &.aos-animate {
+    opacity: 1;
+    letter-spacing: 4px;
+  }
+}
+
+//    transform: translateY(40px) scaleY(1.2);
+
+[data-aos="fade-up-scale"] {
+  opacity: 0;
+  transition-property: opacity, transform;
+  transform: translateY(50px) scaleY(1.15);
+
+  &.aos-animate {
+    opacity: 1;
+    transform: translateY(0px) scaleY(1);
+  }
+}
