@@ -57,7 +57,7 @@ export default {
         event.preventDefault();
         event.stopPropagation();
 
-        if (form.checkValidity() || 1 == 1) {
+        if (form.checkValidity()) {
           // magic?
           this.postData();
         }

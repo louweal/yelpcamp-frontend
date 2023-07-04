@@ -17,6 +17,25 @@
             <nuxt-link class="btn btn-secondary" :to="`/campgrounds/${$route.params.id}/edit`">Edit campground</nuxt-link>
             <button class="btn btn-danger" @click="deletePost()">Delete campground</button>
           </div>
+
+          <form class="needs-validation d-grid gap-3" novalidate ref="form">
+            <div class="form-group">
+              <label for="rating" class="form-label">Rating</label>
+
+              <input class="form-range" type="range" id="rating" min="1" max="5" @input="(e) => (review['rating'] = +e.target.value)" />
+            </div>
+            <div class="form-group">
+              <label for="body" class="form-label">Review</label>
+              <textarea class="form-control" id="body" @input="(e) => (review['body'] = e.target.value)" rows="3" required />
+              <div class="invalid-feedback mb-1">Review body is required</div>
+            </div>
+            <button class="btn btn-primary" type="submit" xxxclick="postData()">Submit review</button>
+          </form>
+
+          <div v-for="(r, i) in campground.reviews" :key="i">
+            Rating: {{ r.rating }}
+            <p>Review: {{ r.body }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -29,6 +48,7 @@ export default {
     return {
       id: undefined,
       campground: { title: undefined, location: undefined },
+      review: { rating: undefined, body: undefined },
     };
   },
 
@@ -42,11 +62,28 @@ export default {
     this.campground = await response.json();
   },
 
+  mounted() {
+    let form = this.$refs["form"];
+
+    form.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (form.checkValidity()) {
+          this.postReview();
+        }
+
+        form.classList.add("was-validated");
+      },
+      false
+    );
+  },
+
   methods: {
     async deletePost() {
-      let url = "http://localhost:3001/campgrounds/" + this.id;
-
-      await fetch(url, {
+      await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
         method: "DELETE",
       })
         .then((res) => res.text()) // or res.json()
@@ -56,6 +93,24 @@ export default {
             this.$router.push(`/campgrounds`);
           }
         });
+    },
+
+    async postReview() {
+      // console.log(this.review);
+      // return;
+
+      const response = await fetch(`http://localhost:3001/campgrounds/${this.id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ review: this.review }),
+      });
+      let res = response.json();
+      res.then((data) => {
+        console.log(data);
+        this.$router.push(`/campgrounds/${data._id}`);
+      });
     },
   },
 };
