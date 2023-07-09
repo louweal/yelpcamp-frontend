@@ -19,7 +19,14 @@ export default {
   },
   async fetch() {
     const response = await fetch("http://localhost:3001/campgrounds");
-    this.campgrounds = await response.json();
+    let res = await response.json();
+
+    if (res.success) {
+      this.campgrounds = res.campgrounds;
+    } else {
+      this.error = res.message;
+      console.log(res);
+    }
   },
 };
 </script>

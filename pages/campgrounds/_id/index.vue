@@ -1,6 +1,9 @@
 <template>
   <main v-if="campground">
-    <div class="container-xl">
+    <div v-if="error" class="alert alert-danger">
+      <p>{{ error }}</p>
+    </div>
+    <div class="container-xl" v-else>
       <div class="row mt-3">
         <div class="col-12 col-md-8 offset-md-2">
           <img class="w-50 mb-3" :src="campground.image" alt="into the wild" />
@@ -22,7 +25,15 @@
             <div class="form-group">
               <label for="rating" class="form-label">Rating</label>
 
-              <input class="form-range" type="range" id="rating" min="1" max="5" @input="(e) => (review['rating'] = +e.target.value)" />
+              <input
+                class="form-range"
+                type="range"
+                id="rating"
+                min="1"
+                max="5"
+                value="5"
+                @input="(e) => (review['rating'] = +e.target.value)"
+              />
             </div>
             <div class="form-group">
               <label for="body" class="form-label">Review</label>
@@ -35,6 +46,7 @@
           <div v-for="(r, i) in campground.reviews" :key="i">
             Rating: {{ r.rating }}
             <p>Review: {{ r.body }}</p>
+            <button class="btn btn-danger btn-sm" @click="deleteReview(r._id)">Delete</button>
           </div>
         </div>
       </div>
@@ -48,7 +60,8 @@ export default {
     return {
       id: undefined,
       campground: { title: undefined, location: undefined },
-      review: { rating: undefined, body: undefined },
+      review: { rating: 5, body: undefined },
+      error: undefined,
     };
   },
 
@@ -57,9 +70,13 @@ export default {
   },
 
   async fetch() {
-    // todo handle errors
     const response = await fetch("http://localhost:3001/campgrounds/" + this.$route.params.id);
-    this.campground = await response.json();
+    let res = await response.json();
+    if (res.campground) {
+      this.campground = res.campground;
+    } else {
+      this.error = res.message || "Unknown error";
+    }
   },
 
   mounted() {
@@ -83,22 +100,30 @@ export default {
 
   methods: {
     async deletePost() {
-      await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
+      let response = await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
         method: "DELETE",
-      })
-        .then((res) => res.text()) // or res.json()
-        .then((res) => {
-          console.log(res === "SUCCESS");
-          if (res === "SUCCESS") {
-            this.$router.push(`/campgrounds`);
-          }
-        });
+      });
+      let res = await response.json();
+      if (res.success) {
+        this.$router.push(`/campgrounds`);
+      } else {
+        console.log(res);
+      }
+    },
+
+    async deleteReview(rid) {
+      let response = await fetch(`http://localhost:3001/campgrounds/${this.id}/reviews/${rid}`, {
+        method: "DELETE",
+      });
+      let res = await response.json();
+      if (res.success) {
+        this.$router.go();
+      } else {
+        console.log(res);
+      }
     },
 
     async postReview() {
-      // console.log(this.review);
-      // return;
-
       const response = await fetch(`http://localhost:3001/campgrounds/${this.id}/reviews`, {
         method: "POST",
         headers: {
@@ -106,11 +131,13 @@ export default {
         },
         body: JSON.stringify({ review: this.review }),
       });
-      let res = response.json();
-      res.then((data) => {
-        console.log(data);
-        this.$router.push(`/campgrounds/${data._id}`);
-      });
+
+      let res = await response.json();
+      if (res.success) {
+        this.$router.go();
+      } else {
+        console.log(res);
+      }
     },
   },
 };

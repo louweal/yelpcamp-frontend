@@ -23,8 +23,17 @@
 
         <div class="form-group">
           <label for="price" class="form-label">Price</label>
-          <input type="text" class="form-control" id="price" @input="(e) => (campground['price'] = e.target.value)" required />
-          <div class="invalid-feedback mb-1">Price is required</div>
+          <input
+            type="number"
+            class="form-control"
+            id="price"
+            @input="(e) => (campground['price'] = e.target.value)"
+            min="0"
+            max="999"
+            pattern="[0-9]"
+            required
+          />
+          <div class="invalid-feedback mb-1">Price is invalid</div>
         </div>
 
         <div class="form-group">
@@ -44,7 +53,7 @@
 export default {
   data() {
     return {
-      campground: { title: undefined, location: undefined, image: undefined, price: undefined, description: undefined },
+      campground: { title: undefined, location: undefined, image: undefined, price: undefined, description: undefined, reviews: [] },
     };
   },
 
@@ -74,26 +83,17 @@ export default {
       let data = { campground: this.campground };
       const response = await fetch("http://localhost:3001/campgrounds", {
         method: "POST",
-        // mode: "cors",
-        // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
         headers: {
           "Content-Type": "application/json",
         },
-        // referrerPolicy: "no-referrer",
-        body: JSON.stringify(data), // body data type must match "Content-Type" header
+        body: JSON.stringify(data),
       });
-      let res = response.json(); // parses JSON response into native JavaScript objects
-      res.then((data) => {
-        console.log(data);
-        this.$router.push(`/campgrounds/${data._id}`);
-      });
-      // .catch((e) => {
-      //   console.log(e);
-      //   return this.$nuxt.error({
-      //     statusCode: 403,
-      //     message: "Access denied",
-      //   });
-      // });
+      let res = await response.json();
+      if (res.success) {
+        this.$router.push(`/campgrounds/${res._id}`);
+      } else {
+        console.log(res);
+      }
     },
   },
 };

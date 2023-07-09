@@ -4,7 +4,10 @@
       <nuxt-link to="/campgrounds">Campgrounds</nuxt-link>
     </div>
 
-    <div>
+    <div class="d-flex align-items-center gap-3">
+      <nuxt-link to="/register">Register</nuxt-link> /
+      <nuxt-link to="/login">Login</nuxt-link>
+
       <nuxt-link class="btn btn-primary" to="/campgrounds/new">Add campground</nuxt-link>
     </div>
   </div>

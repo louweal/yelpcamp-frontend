@@ -89,7 +89,12 @@ export default {
 
   async fetch() {
     const response = await fetch("http://localhost:3001/campgrounds/" + this.id);
-    this.campground = await response.json();
+    let res = await response.json();
+    if (res.success) {
+      this.campground = res.campground;
+    } else {
+      console.log(res);
+    }
   },
   mounted() {
     let form = this.$refs["form"];
@@ -118,23 +123,21 @@ export default {
 
       let data = { campground: this.campground };
       console.log(data);
-      await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
+      let response = await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
         method: "PUT",
-        // mode: "cors",
-        // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
         headers: {
           "Content-Type": "application/json",
         },
-        // referrerPolicy: "no-referrer",
         body: JSON.stringify(data),
-      })
-        .then((res) => res.text()) // or res.json()
-        .then((res) => {
-          console.log(res === "SUCCESS");
-          if (res === "SUCCESS") {
-            this.$router.push(`/campgrounds/${this.id}`);
-          }
-        });
+      });
+
+      let res = await response.json();
+      if (res.success) {
+        this.$router.push(`/campgrounds/${this.id}`);
+      } else {
+        this.error = res.message;
+        console.log(res);
+      }
     },
   },
 };
