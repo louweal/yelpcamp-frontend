@@ -102,6 +102,8 @@ export default {
     async deletePost() {
       let response = await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
         method: "DELETE",
+        mode: "cors",
+        credentials: "include",
       });
       let res = await response.json();
       if (res.success) {
