@@ -4,6 +4,10 @@
       <nuxt-link to="/campgrounds">Campgrounds</nuxt-link>
     </div>
 
+    <div v-if="$store.state.user">
+      {{ $store.state.user.username }}
+    </div>
+
     <div class="d-flex align-items-center gap-3">
       <template v-if="!$store.state.user">
         <nuxt-link to="/register">Register</nuxt-link> /
@@ -23,6 +27,7 @@ export default {
       const response = await fetch("http://localhost:3001/logout");
       let res = await response.json();
       if (res.success) {
+        this.$store.commit("setUser", undefined);
         this.$router.push("/campgrounds");
       }
     },

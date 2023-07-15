@@ -16,37 +16,50 @@
 
           <p><span class="fw-bold">Price per night:</span> $ {{ campground.price }}</p>
 
-          <div class="d-flex gap-2 my-3">
-            <nuxt-link class="btn btn-secondary" :to="`/campgrounds/${$route.params.id}/edit`">Edit campground</nuxt-link>
-            <button class="btn btn-danger" @click="deletePost()">Delete campground</button>
-          </div>
+          <template v-if="campground.author">
+            <p>Submitted by: {{ campground.author.username }}</p>
+
+            <div class="d-flex gap-2 my-3" v-if="$store.state.user && $store.state.user._id === campground.author._id">
+              <nuxt-link class="btn btn-secondary" :to="`/campgrounds/${$route.params.id}/edit`">Edit campground</nuxt-link>
+              <button class="btn btn-danger" @click="deletePost()">Delete campground</button>
+            </div>
+          </template>
 
           <form class="needs-validation d-grid gap-3" novalidate ref="form">
-            <div class="form-group">
-              <label for="rating" class="form-label">Rating</label>
+            <template v-if="$store.state.user">
+              <div class="form-group">
+                <label for="rating" class="form-label">Rating</label>
 
-              <input
-                class="form-range"
-                type="range"
-                id="rating"
-                min="1"
-                max="5"
-                value="5"
-                @input="(e) => (review['rating'] = +e.target.value)"
-              />
-            </div>
-            <div class="form-group">
-              <label for="body" class="form-label">Review</label>
-              <textarea class="form-control" id="body" @input="(e) => (review['body'] = e.target.value)" rows="3" required />
-              <div class="invalid-feedback mb-1">Review body is required</div>
-            </div>
-            <button class="btn btn-primary" type="submit" xxxclick="postData()">Submit review</button>
+                <input
+                  class="form-range"
+                  type="range"
+                  id="rating"
+                  min="1"
+                  max="5"
+                  value="5"
+                  @input="(e) => (review['rating'] = +e.target.value)"
+                />
+              </div>
+              <div class="form-group">
+                <label for="body" class="form-label">Review</label>
+                <textarea class="form-control" id="body" @input="(e) => (review['body'] = e.target.value)" rows="3" required />
+                <div class="invalid-feedback mb-1">Review body is required</div>
+              </div>
+              <button class="btn btn-primary" type="submit">Submit review</button>
+            </template>
           </form>
 
           <div v-for="(r, i) in campground.reviews" :key="i">
-            Rating: {{ r.rating }}
+            Rating: {{ r.rating }} <br />
+            By: {{ r.author.username }}
             <p>Review: {{ r.body }}</p>
-            <button class="btn btn-danger btn-sm" @click="deleteReview(r._id)">Delete</button>
+            <button
+              v-if="$store.state.user && $store.state.user._id === r.author._id"
+              class="btn btn-danger btn-sm"
+              @click="deleteReview(r._id)"
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -70,7 +83,16 @@ export default {
   },
 
   async fetch() {
-    const response = await fetch("http://localhost:3001/campgrounds/" + this.$route.params.id);
+    console.log("this.$store.state.user :>> ", this.$store.state.user);
+
+    const response = await fetch("http://localhost:3001/campgrounds/" + this.$route.params.id, {
+      // method: "GET",
+      // mode: "cors",
+      // credentials: "include",
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+    });
     let res = await response.json();
     if (res.campground) {
       this.campground = res.campground;
@@ -116,6 +138,11 @@ export default {
     async deleteReview(rid) {
       let response = await fetch(`http://localhost:3001/campgrounds/${this.id}/reviews/${rid}`, {
         method: "DELETE",
+        mode: "cors",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
       let res = await response.json();
       if (res.success) {
@@ -128,6 +155,8 @@ export default {
     async postReview() {
       const response = await fetch(`http://localhost:3001/campgrounds/${this.id}/reviews`, {
         method: "POST",
+        mode: "cors",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

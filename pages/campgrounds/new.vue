@@ -42,7 +42,7 @@
           <div class="invalid-feedback mb-1">Description is required</div>
         </div>
         <div class="">
-          <button class="btn btn-primary" type="submit" xxxclick="postData()">Add campground</button>
+          <button class="btn btn-primary" xxxclick="postData()">Add campground</button>
         </div>
       </form>
     </div>
@@ -58,6 +58,7 @@ export default {
   },
 
   mounted() {
+    this.checkAccess();
     let form = this.$refs["form"];
 
     form.addEventListener(
@@ -78,11 +79,11 @@ export default {
   },
   methods: {
     async postData() {
-      console.log(this.campground);
-
       let data = { campground: this.campground };
       const response = await fetch("http://localhost:3001/campgrounds", {
         method: "POST",
+        mode: "cors",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -90,9 +91,15 @@ export default {
       });
       let res = await response.json();
       if (res.success) {
-        this.$router.push(`/campgrounds/${res._id}`);
+        this.$router.push(`/campgrounds/${res.campground._id}`);
       } else {
         console.log(res);
+      }
+    },
+
+    checkAccess() {
+      if (!this.$store.state.user) {
+        this.$router.push("/login");
       }
     },
   },

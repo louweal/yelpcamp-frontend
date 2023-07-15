@@ -69,10 +69,10 @@ export default {
       let res = await response.json();
 
       if (res.success) {
-        this.$router.push(`/campgrounds`);
+        this.$store.commit("setUser", res.user);
+        this.$router.go(-1);
       } else {
         this.error = res.message;
-        console.log(res);
       }
     },
   },

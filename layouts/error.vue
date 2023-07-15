@@ -12,6 +12,7 @@
 
 <script>
 export default {
+  transition: "page",
   props: {
     error: {
       type: Object,

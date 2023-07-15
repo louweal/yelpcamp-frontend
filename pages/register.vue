@@ -16,8 +16,19 @@
         </div>
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input class="form-control" type="password" id="password" @input="(e) => (password = e.target.value)" required />
-          <div class="invalid-feedback mb-1">Password is required</div>
+          <p>
+            Requirements: The password should be at least 8 characters long, at least one uppercase letter, at least one digit and at least
+            one special character.
+          </p>
+          <input
+            class="form-control"
+            type="password"
+            id="password"
+            @input="(e) => (password = e.target.value)"
+            xxxpattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})"
+            required
+          />
+          <div class="invalid-feedback mb-1">Password doesn't meet the requirements.</div>
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
       </form>
@@ -74,10 +85,10 @@ export default {
       let res = await response.json();
 
       if (res.success) {
-        this.$router.push(`/login`);
+        this.$store.commit("setUser", res.user);
+        this.$router.push(`/campgrounds`);
       } else {
         this.error = res.message;
-        console.log(res);
       }
     },
   },

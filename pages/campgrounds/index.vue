@@ -25,7 +25,6 @@ export default {
       this.campgrounds = res.campgrounds;
     } else {
       this.error = res.message;
-      console.log(res);
     }
   },
 };

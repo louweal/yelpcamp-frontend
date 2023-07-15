@@ -66,9 +66,11 @@
           />
           <div class="invalid-feedback mb-1">Description is required</div>
         </div>
-        <div class="">
-          <button class="btn btn-primary" type="submit">Submit</button>
-        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+
+        <p class="text-center text-danger" v-if="error">
+          {{ error }}
+        </p>
       </form>
     </div>
   </main>
@@ -80,18 +82,30 @@ export default {
     return {
       id: undefined,
       campground: { title: undefined, location: undefined, image: undefined, price: undefined, description: undefined },
+      error: undefined,
     };
   },
 
   created() {
     this.id = this.$route.params.id;
+
+    this.checkAccess();
   },
 
   async fetch() {
-    const response = await fetch("http://localhost:3001/campgrounds/" + this.id);
+    const response = await fetch("http://localhost:3001/campgrounds/" + this.id + "/edit", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      mode: "cors",
+      credentials: "include",
+    });
     let res = await response.json();
     if (res.success) {
       this.campground = res.campground;
+      delete this.campground.author;
+      delete this.campground.reviews;
     } else {
       console.log(res);
     }
@@ -117,14 +131,19 @@ export default {
   },
 
   methods: {
+    checkAccess() {
+      if (!this.$store.state.user) {
+        this.$router.push("/login");
+      }
+    },
     async putData() {
-      console.log(this.id);
-      console.log(this.campground);
-
+      console.log("this.$store.state.user :>> ", this.$store.state.user);
       let data = { campground: this.campground };
-      console.log(data);
+      console.log(this.campground);
       let response = await fetch(`http://localhost:3001/campgrounds/${this.id}`, {
         method: "PUT",
+        mode: "cors",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -133,7 +152,9 @@ export default {
 
       let res = await response.json();
       if (res.success) {
-        this.$router.push(`/campgrounds/${this.id}`);
+        this.$router.go(-1); //push(`/campgrounds/${this.id}`);
+
+        console.log("this.$store.state.user :>> ", this.$store.state.user);
       } else {
         this.error = res.message;
         console.log(res);
